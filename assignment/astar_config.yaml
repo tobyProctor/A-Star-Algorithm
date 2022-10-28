@@ -1,0 +1,15 @@
+41x41:
+  begin: "B"
+  end : "E"
+  passage: " "
+  wall: "+"
+61x31:
+  begin: "B"
+  end : "E"
+  passage: "*"
+  wall: "o"
+81x81:
+  begin: "B"
+  end : "E"
+  passage: "x"
+  wall: "."
