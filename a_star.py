@@ -188,54 +188,7 @@ def write_solution(solution_path, map_data, map_name):
 
     print(f"Written solution for file {map_name}_solution.txt.")
 
-# Trace backwards through comeFrom to reconstruct and visualise the optimal path
-def reconstruct_path(comeFrom, start_coords, end_coords, map_manager, map_data, map_name, randomise_start_end):
-    coords = comeFrom[end_coords[0]][end_coords[1]]
-
-    yellow_brick_road = []
-    yellow_brick_road.append(coords)
-
-    done = False
-    while not done:
-        coords = comeFrom[coords[0]][coords[1]]
-
-        if map_manager:
-            map_manager.add_point_marker(coords, YELLOW)
-
-        if coords == start_coords:
-            done = True
-
-        yellow_brick_road.append(coords)
-    
-    print(f"Size of optimal path is {len(yellow_brick_road)}.")
-
-    if not randomise_start_end:
-        write_solution(yellow_brick_road, map_data, map_name)
-
-def main(map_title, visualiser_on, randomise_start_end):
-
-    map_width = int(map_title.split('x')[0])
-    map_height = int(map_title.split('x')[1])
-
-    # Extract map information based on map name
-    astar_config = extract_yaml('assignment/astar_config.yaml')
-    wall_char = astar_config[map_title]['wall']
-    map = extract_map_file(f'assignment/{map_title}.txt')
-
-    if randomise_start_end:
-        # Randomise start and end locations and update the map
-        map, start_location, end_location = randomise_start_end_coords(map, astar_config, map_title)
-    else:
-        # Find the start and end coordinates
-        start_location = get_char_location(astar_config[map_title]['begin'], map)
-        end_location   = get_char_location(astar_config[map_title]['end'], map)
-
-    # Initialise map visualiser
-    if visualiser_on:
-        map_manager = Map_Manager(map, map_width, map_height, wall_char, start_location, end_location)
-    else:
-        map_manager = False
-    
+def find_shortest_route(start_location, end_location, visualiser_on, map, map_manager, map_title, map_width, map_height, wall_char, randomise_start_end):
     # Set static variables for the Point class
     Point.map = map
     Point.wall_char = wall_char
@@ -310,6 +263,67 @@ def main(map_title, visualiser_on, randomise_start_end):
         # Delay by 10ms to visualise A* algorithm
         if visualiser_on:
             sleep(0.01)
+
+    return solved_maze
+
+# Trace backwards through comeFrom to reconstruct and visualise the optimal path
+def reconstruct_path(comeFrom, start_coords, end_coords, map_manager, map_data, map_name, randomise_start_end):
+    coords = comeFrom[end_coords[0]][end_coords[1]]
+
+    yellow_brick_road = []
+    yellow_brick_road.append(coords)
+
+    done = False
+    while not done:
+        coords = comeFrom[coords[0]][coords[1]]
+
+        if map_manager:
+            map_manager.add_point_marker(coords, YELLOW)
+
+        if coords == start_coords:
+            done = True
+
+        yellow_brick_road.append(coords)
+    
+    print(f"Size of optimal path is {len(yellow_brick_road)}.")
+
+    if not randomise_start_end:
+        write_solution(yellow_brick_road, map_data, map_name)
+
+def main(map_title, visualiser_on, randomise_start_end):
+
+    map_width = int(map_title.split('x')[0])
+    map_height = int(map_title.split('x')[1])
+
+    # Extract map information based on map name
+    astar_config = extract_yaml('assignment/astar_config.yaml')
+    wall_char = astar_config[map_title]['wall']
+    map = extract_map_file(f'assignment/{map_title}.txt')
+
+    if randomise_start_end:
+        # Randomise start and end locations and update the map
+        map, start_location, end_location = randomise_start_end_coords(map, astar_config, map_title)
+    else:
+        # Find the start and end coordinates
+        start_location = get_char_location(astar_config[map_title]['begin'], map)
+        end_location   = get_char_location(astar_config[map_title]['end'], map)
+
+    # Initialise map visualiser
+    if visualiser_on:
+        map_manager = Map_Manager(map, map_width, map_height, wall_char, start_location, end_location)
+    else:
+        map_manager = False
+    
+    solved_maze = find_shortest_route(start_location, \
+                        end_location, \
+                        visualiser_on, \
+                        map, \
+                        map_manager, \
+                        map_title, \
+                        map_width, \
+                        map_height, \
+                        wall_char, \
+                        randomise_start_end)
 
     # Keep visualiser open after a solution has been found
     if visualiser_on:
